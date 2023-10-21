@@ -223,3 +223,46 @@ class Solution {
         return maxArea;
     }
 }
+
+// 1944.
+// time - O(n) - each element is inserted into stack once
+// space - O(n) for stack
+class Solution {
+    public int[] canSeePersonsCount(int[] heights) {
+        //edge
+        if(heights == null || heights.length == 0)
+        {
+            return new int[0];
+        }
+
+        int[] result = new int[heights.length]; //result[i] is the count of people ith person can see
+        Stack<Integer> support = new Stack<>();
+
+        //consider case like [5,2,3,1,7]
+        //first person can see 2,3,1 and not 1 even thought 2 > 1 because 3 blocks 1
+        //so 3 has to be processed first before 5
+        for(int i = heights.length - 1; i >= 0; i--)
+        {
+            int visiblePeopleCount = 0;
+
+            //count number of people smaller than to current and to right
+            while(!support.isEmpty() && support.peek() < heights[i])
+            {
+                visiblePeopleCount++; //current sees element at stack top
+                support.pop(); //this person at stack top won't be visible to anyone in left as current blocks this person
+            }
+
+            //current can also see one person taller or of equal height in right
+            if(!support.isEmpty())
+            {
+                visiblePeopleCount++;
+            }
+
+            //i can be visible to people in left
+            support.push(heights[i]);
+            result[i] = visiblePeopleCount;
+        }
+
+        return result;
+    }
+}
