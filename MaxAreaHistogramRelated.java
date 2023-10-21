@@ -60,3 +60,86 @@ class Solution {
         return maxScore;
     }
 }
+
+// 1856.
+// time - O(n)
+// space - O(n)
+class Solution {
+    public int maxSumMinProduct(int[] nums) {
+        //edge
+        if(nums == null || nums.length == 0)
+        {
+            return 0;
+        }
+
+        int mod = (int) 1e9 + 7;
+
+        long result = Long.MIN_VALUE; //return value
+        long[] runningSum = new long[nums.length]; //runningSum[i] = sum of all elements from 0 to i
+        Stack<int[]> support = new Stack<>(); //keeps track of start of each sub array (index 1) and min in that sub array (index 0) that can be extended to right
+
+        for(int i = 0; i < nums.length; i++)
+        {
+            //update running sum
+            if(i == 0)
+            {
+                runningSum[i] = nums[i];
+            }
+            else
+            {
+                runningSum[i] += runningSum[i - 1] + nums[i];
+            }
+
+            int startIndex = i; //current subarray starts at i
+
+            //check if current elements breaks any prev sub arays from extending to right
+            while(!support.isEmpty() && support.peek()[0] > nums[i])
+            {
+                //prev sub array with that min can't be extended to right as smaller min (nums[i]) is found
+                int[] prev = support.pop();
+                int prevMin = prev[0];
+                int prevEnd = i - 1; //i is not part of prev sub array
+                int prevStart = prev[1];
+
+                //sum of [i,j] = runningSum[j] - runningSum[i - 1]
+                long prevSum = runningSum[prevEnd];
+                if(prevStart > 0)
+                {
+                    prevSum -= runningSum[prevStart - 1];
+                }
+
+                long prevResult =  (prevMin * prevSum);
+
+                //update max with prev
+                result = Math.max(result, prevResult);
+
+                //current sub array can be extended to left 
+                startIndex = prevStart;
+            }
+
+            //current sub array will be computed in future iterations
+            support.push(new int[]{nums[i], startIndex}); 
+        }
+
+        //there can still be subarrays extending all the way to end
+        while(!support.isEmpty())
+        {
+            int[] current = support.pop();
+            int currentMin = current[0];
+            int currentEnd = nums.length - 1; //current extends till end of array
+            int currentStart = current[1];
+
+            //sum of [i,j] = runningSum[j] - runningSum[i - 1]
+            long currentSum = runningSum[currentEnd];
+            if(currentStart > 0)
+            {
+                currentSum -= runningSum[currentStart - 1];
+            }
+            
+            long currentResult =  (currentSum * currentMin);
+            result = Math.max(result, currentResult);
+        }
+
+        return (int) (result % mod);
+    }
+}
