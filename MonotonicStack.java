@@ -175,3 +175,51 @@ class Solution {
         return false;
     }
 }
+
+// 84.
+// time - O(n) - each bar is inserted into and removed from stack once
+// space - O(n) for stack - scenario in case [9,8,7,6,5]
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+        //edge
+        if(heights == null)
+        {
+            return 0;
+        }
+
+        int maxArea = 0; //return value
+        Stack<int[]> support = new Stack<>(); //keeps tracks of the bars that can be extended to right and their start indices
+
+        for(int i = 0; i < heights.length; i++)
+        {
+            int startIndex = i; //current bar starts from index i
+            //check if this bar stops any previous bars from extending to right
+            while(!support.isEmpty() && support.peek()[0] > heights[i])
+            {
+                //current bar is shorter than bar at stack top and prev bar can't be extended to right
+                int[] prevBar = support.pop();
+                int prevHeight = prevBar[0];
+                int prevWidth = i - prevBar[1]; //prev bar ranges from [prev start, i)
+
+                maxArea = Math.max(maxArea, prevHeight * prevWidth); //update max area based on prev bar area
+
+                //current bar is shorter than prev bar and it can be extended to left till prevBar start
+                startIndex = prevBar[1];
+            }
+
+            //current bar starts at startIndex and can be extended to right, so push to stack
+            support.push(new int[]{heights[i], startIndex});
+        }
+
+        //some bars may remain in stack (meaning they can be extended from their start till end)
+        while(!support.isEmpty())
+        {
+            int[] current = support.pop();
+            int currentHeight = current[0];
+            int currentWidth = heights.length - current[1]; //current bar ranges from [start, end)
+            maxArea = Math.max(maxArea, currentHeight * currentWidth); //update max area based on current bar area
+        }
+
+        return maxArea;
+    }
+}
