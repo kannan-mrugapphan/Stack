@@ -266,3 +266,33 @@ class Solution {
         return result;
     }
 }
+
+// 901.
+class StockSpanner {
+    //similar to previous greater element
+    Stack<int[]> support; 
+
+    public StockSpanner() {
+        support = new Stack<>(); //initialize the stack of int[]
+        //0th index in int[] is element and 1st index is its span
+    }
+    
+    //time - O(n) - current day spans till 0th day
+    //space - O(n) for stack - [1,2,3,4,5]
+    public int next(int price) {
+        int result = 1; //each element has a span of 1 accounting for itself
+
+        //check if smaller values were seen previously
+        while(!support.isEmpty() && support.peek()[0] <= price)
+        {
+            //1 prev day has smaller stock price
+            result += support.peek()[1]; //increase span by span of this day to account for this day
+            support.pop(); //this prev day with lower price won't affect future dates
+        }
+
+        //at this point prev prices are larger than or same as price on current day
+        support.push(new int[]{price, result}); //this price can be part of span for future day
+        return result;
+    }
+}
+
