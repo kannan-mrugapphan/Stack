@@ -143,3 +143,80 @@ class Solution {
         return (int) (result % mod);
     }
 }
+
+// 85.
+// time - O(n*nm)
+// space - O(n)
+class Solution {
+    public int maximalRectangle(char[][] matrix) {
+        int result = 0; //return value
+
+        //process all rows from top to end 
+        int[] nums = new int[matrix[0].length];
+
+        for(char[] row : matrix)
+        {
+            //copy each element
+            for(int i = 0; i < row.length; i++)
+            {
+                //reset if 0
+                if(row[i] == '0')
+                {
+                    nums[i] = 0;
+                }
+                //extend on top of prev
+                else
+                {
+                    nums[i] += 1; 
+                }
+            }
+            
+            //get area for this row
+            result = Math.max(result, findMaxAreaInHistogram(nums));
+        }
+
+        return result;
+    }
+
+    //returns max area in histogram
+    //time - O(n)
+    //space - O(n)
+    private int findMaxAreaInHistogram(int[] nums)
+    {
+        Stack<int[]> support = new Stack<>(); //to keep track of bars that can be extended to right
+        int maxArea = 0; //return value
+
+        for(int i = 0; i < nums.length; i++)
+        {
+            int startIndex = i; //current bar starts at i
+            //check if current bar stops any prev bars from extending to right
+            while(!support.isEmpty() && support.peek()[0] >= nums[i])
+            {
+                int[] prev = support.pop(); //prev bar is shorter or equal and can't be extended to right
+                int prevHeight = prev[0];
+                int prevStart = prev[1];
+                int prevEnd = i - 1;
+                int prevArea = prevHeight * (prevEnd - prevStart + 1);
+
+                maxArea = Math.max(maxArea, prevArea); //update result
+                startIndex = prevStart; //current bar can be extended to left
+            }
+
+            support.push(new int[]{nums[i], startIndex});
+        }
+
+        //process bars extending till end
+        while(!support.isEmpty())
+        {
+            int[] current = support.pop(); 
+            int currentHeight = current[0];
+            int currentStart = current[1];
+            int currentEnd = nums.length - 1;
+            int currentArea = currentHeight * (currentEnd - currentStart + 1);
+
+            maxArea = Math.max(maxArea, currentArea); //update result
+        }
+
+        return maxArea;
+    }
+}
